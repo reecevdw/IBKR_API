@@ -15,6 +15,13 @@ class IBKRClient(EClient, EWrapper):
     def accountSummary(self, reqId, account, tag, value, currency):
         print(f"Account: {account}, {tag}: {value} {currency}")
 
+    # Step 1b: Add a method to handle tick price data
+    def tickPrice(self, reqId, tickType, price, attrib):
+        print(f"Tick Price. Ticker Id: {reqId}, Tick Type: {tickType}, Price: {price}")
+
+    def tickSize(self, reqId, tickType, size):
+        print(f"Tick Size. Ticker Id: {reqId}, Tick Type: {tickType}, Size: {size}")
+
 # Step 2: Connect to TWS or IB Gateway
 def run_loop():
     app.run()
@@ -26,10 +33,22 @@ app.connect("127.0.0.1", 7497, clientId=1)  # Use 7496 for live trading
 api_thread = threading.Thread(target=run_loop, daemon=True)
 api_thread.start()
 
-# Step 4: Request Account Summary
+# Step 4: Define a contract for the stock (e.g., Apple)
+def create_stock_contract(symbol):
+    contract = Contract()
+    contract.symbol = symbol
+    contract.secType = "STK"
+    contract.exchange = "SMART"
+    contract.currency = "USD"
+    return contract
+
+# Step 5: Request Market Data for Apple (AAPL)
 time.sleep(1)  # Allow time to establish connection
+app.reqMktData(1, create_stock_contract("TQQQ"), "", False, False, [])
+
+# Step 6: Request Account Summary (Optional)
 app.reqAccountSummary(1, "All", "$LEDGER")
 
-# Step 5: Disconnect
-time.sleep(5)  # Adjust this to keep the connection alive for as long as needed
+# Keep the script running to receive data
+time.sleep(20)  # Adjust this to keep the connection open as long as needed
 app.disconnect()
